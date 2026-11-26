@@ -27,6 +27,11 @@ public class ControladorUsuario {
 
     public Usuario registrarUsuario(String nombre, String nombreAcceso, Rol rol, String claveInicial,
                                     Administrador administrador) {
+                String errorNombre = Validaciones.errorNombre("nombre", nombre, Validaciones.MAX_NOMBRE_USUARIO);
+        if (errorNombre != null) {
+            throw new ExcepcionNegocio(errorNombre);
+        }
+        nombre = Validaciones.normalizarNombre(nombre);
         if (rol == null) {
             throw new ExcepcionNegocio("Elige el rol del usuario.");
         }
@@ -48,7 +53,12 @@ public class ControladorUsuario {
         return u;
     }
 
-    public Usuario modificarUsuario(Usuario usuario, String nombre, Rol rol, Administrador administrador) {
+        public Usuario modificarUsuario(Usuario usuario, String nombre, Rol rol, Administrador administrador) {
+        String errorNombre = Validaciones.errorNombre("nombre", nombre, Validaciones.MAX_NOMBRE_USUARIO);
+        if (errorNombre != null) {
+            throw new ExcepcionNegocio(errorNombre);
+        }
+        nombre = Validaciones.normalizarNombre(nombre);
         try {
             usuario.setNombre(nombre);
         } catch (IllegalArgumentException e) {
