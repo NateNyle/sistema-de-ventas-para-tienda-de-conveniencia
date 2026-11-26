@@ -13,3 +13,4 @@ public interface RepositorioCajas {
 
     void guardarCierre(CierreCaja cierre, List<Venta> ventas, List<Pago> devoluciones);
 }
+// prueba git hub 1.1
