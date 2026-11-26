@@ -587,6 +587,17 @@ class PanelVenta extends PanelBase {
             operacion.requestFocusInWindow();
             return;
         }
+                if (t == TipoComprobante.BOLETA) {
+            String errorDni = Validaciones.errorDni(dni.getText());
+            String errorNombre = Validaciones.errorNombre("nombre del cliente", nombre.getText(), Validaciones.MAX_NOMBRE_CLIENTE);
+            if (errorDni != null || errorNombre != null) {
+                dni.setError(errorDni != null);
+                nombre.setError(errorDni == null);
+                aviso.mostrar(Aviso.Tipo.ERROR, errorDni != null ? errorDni : errorNombre);
+                (errorDni != null ? dni : nombre).requestFocusInWindow();
+                return;
+            }
+        }
         Comprobante[] comp = new Comprobante[1];
         boolean ok = ejecutar(() -> {
             Cliente cliente = null;
