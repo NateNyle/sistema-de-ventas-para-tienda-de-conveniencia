@@ -16,10 +16,13 @@ public final class FiltrosTexto {
     private FiltrosTexto() {
     }
 
-    public static void soloDni(JTextComponent campo) {
-        ((AbstractDocument) campo.getDocument()).setDocumentFilter(new FiltroDni());
+        public static void soloDni(JTextComponent campo) {
+        ((AbstractDocument) campo.getDocument()).setDocumentFilter(new FiltroDni(Validaciones.LONGITUD_DNI));
     }
 
+    public static void soloRuc(JTextComponent campo) {
+        ((AbstractDocument) campo.getDocument()).setDocumentFilter(new FiltroDni(Validaciones.LONGITUD_RUC));
+    }
     public static void soloNombre(JTextComponent campo, int maximo) {
         ((AbstractDocument) campo.getDocument()).setDocumentFilter(new FiltroNombre(maximo));
     }
@@ -52,6 +55,11 @@ public final class FiltrosTexto {
     }
 
     private static final class FiltroDni extends DocumentFilter {
+                private final int maximo;
+
+        FiltroDni(int maximo) {
+            this.maximo = maximo;
+        }
         @Override
         public void insertString(FilterBypass fb, int offset, String texto, AttributeSet atributos)
                 throws BadLocationException {
@@ -65,7 +73,7 @@ public final class FiltrosTexto {
                 super.replace(fb, offset, longitud, texto, atributos);
                 return;
             }
-            int libres = Validaciones.LONGITUD_DNI - (fb.getDocument().getLength() - longitud);
+            int libres = maximo - (fb.getDocument().getLength() - longitud);
             StringBuilder digitos = new StringBuilder();
             for (int i = 0; i < texto.length() && digitos.length() < libres; i++) {
                 if (Validaciones.esDigitoDni(texto.charAt(i))) {

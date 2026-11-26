@@ -264,6 +264,7 @@ class PanelVenta extends PanelBase {
         });
         tipo.seleccionar(TipoComprobante.VENTA_SIMPLE);
                 FiltrosTexto.soloDni(dni);
+                FiltrosTexto.soloRuc(ruc);
         FiltrosTexto.soloNombre(nombre, Validaciones.MAX_NOMBRE_CLIENTE);
         FiltrosTexto.quitarErrorAlEscribir(nombre);
         dni.getDocument().addDocumentListener(alEscribir(() -> autocompletar(TipoDocumento.DNI, dni, nombre)));
@@ -595,6 +596,15 @@ class PanelVenta extends PanelBase {
                 nombre.setError(errorDni == null);
                 aviso.mostrar(Aviso.Tipo.ERROR, errorDni != null ? errorDni : errorNombre);
                 (errorDni != null ? dni : nombre).requestFocusInWindow();
+                return;
+            }
+        }
+                if (t == TipoComprobante.FACTURA) {
+            String errorRuc = Validaciones.errorRuc(ruc.getText());
+            if (errorRuc != null) {
+                ruc.setError(true);
+                aviso.mostrar(Aviso.Tipo.ERROR, errorRuc);
+                ruc.requestFocusInWindow();
                 return;
             }
         }
