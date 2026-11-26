@@ -26,6 +26,8 @@ class PanelUsuarios extends PanelBase {
         super(ctx, "Usuarios", "Cajeros y administradores. Los usuarios no se borran: se desactivan (RN-11).",
                 Icono.Tipo.USUARIOS, "CU-12");
         filaClave = Textos.conEtiqueta("Contraseña inicial", clave);
+        FiltrosTexto.soloNombre(nombre, Validaciones.MAX_NOMBRE_USUARIO);
+        FiltrosTexto.quitarErrorAlEscribir(nombre);
         JPanel centro = Textos.transparente(new BorderLayout(16, 0));
         Tarjeta t = new Tarjeta();
         Tablas.ancho(tabla, 1, 120, true);
@@ -125,6 +127,7 @@ class PanelUsuarios extends PanelBase {
         tabla.clearSelection();
         tituloForm.setText("Nuevo usuario");
         nombre.setText("");
+        nombre.setError(false);
         acceso.setText("");
         acceso.setEditable(true);
         clave.setText("");
@@ -140,7 +143,8 @@ class PanelUsuarios extends PanelBase {
         editando = u;
         aviso.limpiar();
         tituloForm.setText("Editar usuario");
-        nombre.setText(u.getNombre());
+        FiltrosTexto.asignar(nombre, u.getNombre());
+        nombre.setError(false);
         acceso.setText(u.getNombreAcceso());
         acceso.setEditable(false);
         rol.setSelectedItem(u.getRol());
@@ -157,6 +161,7 @@ class PanelUsuarios extends PanelBase {
 
     private void guardar() {
         aviso.limpiar();
+        nombre.setError(Validaciones.errorNombre("nombre", nombre.getText(), Validaciones.MAX_NOMBRE_USUARIO) != null);
         if (editando == null) {
             Usuario[] r = new Usuario[1];
             if (ejecutar(() -> r[0] = ctx.usuarios.registrarUsuario(nombre.getText(), acceso.getText(), rol.seleccionado(),
