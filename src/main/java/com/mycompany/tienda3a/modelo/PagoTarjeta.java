@@ -14,7 +14,7 @@ public class PagoTarjeta extends Pago implements PagoElectronico {
 
     @Override
     public boolean validar() {
-        return referenciaDigital.matches("[0-9A-Za-z-]{4,20}");
+            return ValidacionesPago.esOperacionValida(referenciaDigital);
     }
 
     @Override

@@ -160,8 +160,8 @@ public class ControladorVenta {
                 throw new ExcepcionNegocio(String.format("El monto entregado (S/ %.2f) no cubre el total de S/ %.2f.",
                         e.getMontoEntregado(), venta.getTotal()));
             }
-            throw new ExcepcionNegocio("Escribe el número de operación del pago (de 4 a 20 letras o números).");
-        }
+            String error = pago instanceof PagoElectronico pe ? ValidacionesPago.errorOperacion(pe.getReferenciaDigital()) : null;
+            throw new ExcepcionNegocio(error != null ? error : "El pago no es válido.");        }
         return true;
     }
 
