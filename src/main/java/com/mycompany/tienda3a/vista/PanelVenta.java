@@ -49,8 +49,7 @@ class PanelVenta extends PanelBase {
     private final Campo recibido = new Campo("0.00");
     private final JPanel rapidos = Textos.transparente(new GridLayout(1, 4, 6, 0));
     private final JLabel vuelto = Textos.monto("S/ 0.00", 16, Tema.TEXTO);
-    private final Campo operacion = new Campo("Número de operación del voucher o de la app");
-
+    private final Campo operacion = new Campo("Solo números, de 4 a 20 dígitos");
     private final JLabel subtotal = Textos.monto("S/ 0.00", 13.5f, Tema.TEXTO);
     private final JLabel igv = Textos.monto("S/ 0.00", 13.5f, Tema.TEXTO);
     private final JLabel ahorroTotal = Textos.monto("S/ 0.00", 13.5f, Tema.AMARILLO_TEXTO);
@@ -303,6 +302,8 @@ class PanelVenta extends PanelBase {
             operacion.setError(false);
             recibido.setError(false);
         });
+            FiltrosNumericos.soloMonto(recibido);
+        FiltrosNumericos.soloDigitos(operacion, ValidacionesPago.MAX_DIGITOS_OPERACION);
         recibido.getDocument().addDocumentListener(alEscribir(this::actualizarVuelto));
         col.add(pago, g);
 
@@ -574,10 +575,16 @@ class PanelVenta extends PanelBase {
         }
         TipoComprobante t = tipo.getSeleccionado();
         MedioPago m = medio.getSeleccionado();
-        if (m == MedioPago.EFECTIVO && recibido.getText().isBlank()) {
+        if (m == MedioPago.EFECTIVO && ValidacionesPago.errorMonto(recibido.getText()) != null) {
             recibido.setError(true);
-            aviso.mostrar(Aviso.Tipo.ERROR, "Escribe el monto que entregó el cliente (o pulsa «Exacto»).");
+            aviso.mostrar(Aviso.Tipo.ERROR, ValidacionesPago.errorMonto(recibido.getText()));
             recibido.requestFocusInWindow();
+            return;
+        }
+        if (m != MedioPago.EFECTIVO && ValidacionesPago.errorOperacion(operacion.getText()) != null) {
+            operacion.setError(true);
+            aviso.mostrar(Aviso.Tipo.ERROR, ValidacionesPago.errorOperacion(operacion.getText()));
+            operacion.requestFocusInWindow();
             return;
         }
         Comprobante[] comp = new Comprobante[1];
