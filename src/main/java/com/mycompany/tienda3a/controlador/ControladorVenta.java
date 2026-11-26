@@ -103,8 +103,14 @@ public class ControladorVenta {
     }
 
     public Cliente obtenerCliente(TipoDocumento tipo, String numero, String nombreRazonSocial, String direccion) {
-        String doc = numero == null ? "" : numero.trim();
-        validarDocumentoCliente(tipo, doc);
+               String doc = numero == null ? "" : (tipo == TipoDocumento.DNI ? numero : numero.trim());
+        if (tipo == TipoDocumento.DNI) {
+            String errorNombre = Validaciones.errorNombre("nombre del cliente", nombreRazonSocial, Validaciones.MAX_NOMBRE_CLIENTE);
+            if (errorNombre != null) {
+                throw new ExcepcionNegocio(errorNombre);
+            }
+            nombreRazonSocial = Validaciones.normalizarNombre(nombreRazonSocial);
+        }
         Cliente c = clientes.buscarPorDocumento(tipo, doc);
         try {
             if (c == null) {
@@ -123,8 +129,11 @@ public class ControladorVenta {
     }
 
     private void validarDocumentoCliente(TipoDocumento tipo, String numero) {
-        if (tipo == TipoDocumento.DNI && !numero.matches("\\d{8}")) {
-            throw new ExcepcionNegocio("El DNI debe tener 8 dígitos.");
+                if (tipo == TipoDocumento.DNI) {
+            String errorDni = Validaciones.errorDni(numero);
+            if (errorDni != null) {
+                throw new ExcepcionNegocio(errorDni);
+            }
         }
         if (tipo == TipoDocumento.RUC && !numero.matches("(10|15|17|20)\\d{9}")) {
             throw new ExcepcionNegocio("El RUC debe tener 11 dígitos y empezar con 10, 15, 17 o 20.");
