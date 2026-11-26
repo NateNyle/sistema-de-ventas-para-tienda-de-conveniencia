@@ -264,6 +264,9 @@ class PanelVenta extends PanelBase {
             datosCliente.revalidate();
         });
         tipo.seleccionar(TipoComprobante.VENTA_SIMPLE);
+                FiltrosTexto.soloDni(dni);
+        FiltrosTexto.soloNombre(nombre, Validaciones.MAX_NOMBRE_CLIENTE);
+        FiltrosTexto.quitarErrorAlEscribir(nombre);
         dni.getDocument().addDocumentListener(alEscribir(() -> autocompletar(TipoDocumento.DNI, dni, nombre)));
         ruc.getDocument().addDocumentListener(alEscribir(() -> autocompletar(TipoDocumento.RUC, ruc, razon)));
         col.add(comp, g);
@@ -533,7 +536,7 @@ class PanelVenta extends PanelBase {
         if ((td == TipoDocumento.DNI && n.length() == 8) || (td == TipoDocumento.RUC && n.length() == 11)) {
             Cliente c = ctx.venta.buscarCliente(td, n);
             if (c != null && nom.getText().isBlank()) {
-                nom.setText(c.getNombreRazonSocial());
+                FiltrosTexto.asignar(nom, c.getNombreRazonSocial());
                 if (td == TipoDocumento.RUC && direccion.getText().isBlank()) {
                     direccion.setText(c.getDireccion());
                 }
@@ -587,7 +590,13 @@ class PanelVenta extends PanelBase {
                     cliente = ctx.venta.obtenerCliente(TipoDocumento.RUC, ruc.getText(), razon.getText(), direccion.getText());
                 }
             } catch (ExcepcionNegocio e) {
-                (t == TipoComprobante.BOLETA ? dni : ruc).setError(true);
+                if (t == TipoComprobante.BOLETA) {
+                    boolean dniIncorrecto = Validaciones.errorDni(dni.getText()) != null;
+                    dni.setError(dniIncorrecto);
+                    nombre.setError(!dniIncorrecto);
+                } else {
+                    ruc.setError(true);
+                }
                 throw e;
             }
             ctx.venta.elegirComprobante(venta, t, cliente);
