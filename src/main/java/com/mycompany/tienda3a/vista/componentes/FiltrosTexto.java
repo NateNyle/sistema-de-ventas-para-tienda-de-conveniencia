@@ -19,7 +19,10 @@ public final class FiltrosTexto {
         public static void soloDni(JTextComponent campo) {
         ((AbstractDocument) campo.getDocument()).setDocumentFilter(new FiltroDni(Validaciones.LONGITUD_DNI));
     }
-
+    public static void soloCantidad(JTextComponent campo) {
+        ((AbstractDocument) campo.getDocument()).setDocumentFilter(new FiltroCantidad());
+    }
+        
     public static void soloRuc(JTextComponent campo) {
         ((AbstractDocument) campo.getDocument()).setDocumentFilter(new FiltroDni(Validaciones.LONGITUD_RUC));
     }
@@ -85,7 +88,42 @@ public final class FiltrosTexto {
             }
         }
     }
+    private static final class FiltroCantidad extends DocumentFilter {
+        private static final java.util.regex.Pattern FORMATO = java.util.regex.Pattern.compile("[0-9]{0,5}([.,][0-9]{0,3})?");
 
+        @Override
+        public void insertString(FilterBypass fb, int offset, String texto, AttributeSet atributos)
+                throws BadLocationException {
+            replace(fb, offset, 0, texto, atributos);
+        }
+
+        @Override
+        public void replace(FilterBypass fb, int offset, int longitud, String texto, AttributeSet atributos)
+                throws BadLocationException {
+            if (texto == null || texto.isEmpty() || sinFiltro(fb)) {
+                super.replace(fb, offset, longitud, texto, atributos);
+                return;
+            }
+            Document doc = fb.getDocument();
+            StringBuilder resultado = new StringBuilder(doc.getText(0, doc.getLength()));
+            resultado.delete(offset, offset + longitud);
+            int posicion = offset;
+            StringBuilder aceptado = new StringBuilder();
+            for (int i = 0; i < texto.length(); i++) {
+                char c = texto.charAt(i);
+                resultado.insert(posicion, c);
+                if (FORMATO.matcher(resultado).matches()) {
+                    aceptado.append(c);
+                    posicion++;
+                } else {
+                    resultado.deleteCharAt(posicion);
+                }
+            }
+            if (aceptado.length() > 0) {
+                super.replace(fb, offset, longitud, aceptado.toString(), atributos);
+            }
+        }
+    }
     private static final class FiltroNombre extends DocumentFilter {
         private final int maximo;
 

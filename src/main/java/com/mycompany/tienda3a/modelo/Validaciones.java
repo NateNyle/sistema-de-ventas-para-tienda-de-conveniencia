@@ -55,9 +55,12 @@ public final class Validaciones {
         if (!DNI.matcher(dni).matches()) {
             return "El DNI debe tener exactamente 8 dígitos (tiene " + dni.length() + ").";
         }
+                if (dni.matches("0+")) {
+            return "El DNI no es válido: no puede ser 00000000.";
+        }
         return null;
     }
-
+    
     public static String errorRuc(String ruc) {
         if (ruc == null || ruc.isEmpty()) {
             return "El RUC es obligatorio.";
@@ -68,11 +71,15 @@ public final class Validaciones {
         if (ruc.length() != LONGITUD_RUC) {
             return "El RUC debe tener exactamente 11 dígitos (tiene " + ruc.length() + ").";
         }
+                if (ruc.matches("0+")) {
+            return "El RUC no es válido: no puede ser 00000000000.";
+        }
         if (!ruc.matches("(10|15|17|20)[0-9]{9}")) {
             return "El RUC debe empezar con 10, 15, 17 o 20.";
         }
         return null;
     }
+
     public static String errorNombre(String etiqueta, String nombre, int maximo) {
         String n = normalizarNombre(nombre);
         if (n.isEmpty()) {
