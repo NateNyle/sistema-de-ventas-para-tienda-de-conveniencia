@@ -6,6 +6,7 @@ import java.util.regex.Pattern;
 
 public final class Validaciones {
     public static final int LONGITUD_DNI = 8;
+    public static final int LONGITUD_RUC = 11;
     public static final int MAX_NOMBRE_USUARIO = 120;
     public static final int MAX_NOMBRE_CLIENTE = 150;
 
@@ -53,6 +54,28 @@ public final class Validaciones {
         }
         if (!DNI.matcher(dni).matches()) {
             return "El DNI debe tener exactamente 8 dígitos (tiene " + dni.length() + ").";
+        }
+                if (dni.matches("0+")) {
+            return "El DNI no es válido: no puede ser 00000000.";
+        }
+        return null;
+    }
+    
+    public static String errorRuc(String ruc) {
+        if (ruc == null || ruc.isEmpty()) {
+            return "El RUC es obligatorio.";
+        }
+        if (!SOLO_DIGITOS.matcher(ruc).matches()) {
+            return "El RUC solo puede tener números (sin letras, espacios ni símbolos).";
+        }
+        if (ruc.length() != LONGITUD_RUC) {
+            return "El RUC debe tener exactamente 11 dígitos (tiene " + ruc.length() + ").";
+        }
+                if (ruc.matches("0+")) {
+            return "El RUC no es válido: no puede ser 00000000000.";
+        }
+        if (!ruc.matches("(10|15|17|20)[0-9]{9}")) {
+            return "El RUC debe empezar con 10, 15, 17 o 20.";
         }
         return null;
     }

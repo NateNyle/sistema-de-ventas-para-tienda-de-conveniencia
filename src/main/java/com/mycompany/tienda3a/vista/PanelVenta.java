@@ -49,7 +49,8 @@ class PanelVenta extends PanelBase {
     private final Campo recibido = new Campo("0.00");
     private final JPanel rapidos = Textos.transparente(new GridLayout(1, 4, 6, 0));
     private final JLabel vuelto = Textos.monto("S/ 0.00", 16, Tema.TEXTO);
-    private final Campo operacion = new Campo("Solo números, de 4 a 20 dígitos");
+    private final Campo operacion = new Campo("Escribe el número");
+    private final JLabel etiquetaOperacion = Textos.etiqueta("Número de operación");
     private final JLabel subtotal = Textos.monto("S/ 0.00", 13.5f, Tema.TEXTO);
     private final JLabel igv = Textos.monto("S/ 0.00", 13.5f, Tema.TEXTO);
     private final JLabel ahorroTotal = Textos.monto("S/ 0.00", 13.5f, Tema.AMARILLO_TEXTO);
@@ -264,6 +265,8 @@ class PanelVenta extends PanelBase {
         });
         tipo.seleccionar(TipoComprobante.VENTA_SIMPLE);
                 FiltrosTexto.soloDni(dni);
+                FiltrosTexto.soloCantidad(cantidad);
+                FiltrosTexto.soloRuc(ruc);
         FiltrosTexto.soloNombre(nombre, Validaciones.MAX_NOMBRE_CLIENTE);
         FiltrosTexto.quitarErrorAlEscribir(nombre);
         dni.getDocument().addDocumentListener(alEscribir(() -> autocompletar(TipoDocumento.DNI, dni, nombre)));
@@ -290,7 +293,10 @@ class PanelVenta extends PanelBase {
         efectivo.add(rapidos, BorderLayout.CENTER);
         datosPago.add(efectivo, "EFECTIVO");
         JPanel electronico = Textos.transparente(new BorderLayout(0, 6));
-        electronico.add(Textos.conEtiqueta("N° de operación", operacion), BorderLayout.NORTH);
+        JPanel filaOperacion = Textos.transparente(new BorderLayout(0, 6));
+        filaOperacion.add(etiquetaOperacion, BorderLayout.NORTH);
+        filaOperacion.add(operacion, BorderLayout.CENTER);
+        electronico.add(filaOperacion, BorderLayout.NORTH);
         electronico.add(Textos.texto("Lo informa el POS o la app del cliente (RN-09).", 11.5f, Tema.TEXTO_TENUE), BorderLayout.CENTER);
         datosPago.add(electronico, "ELECTRONICO");
         pc.add(datosPago, BorderLayout.CENTER);
@@ -298,6 +304,7 @@ class PanelVenta extends PanelBase {
 
         medio.alCambiar(m -> {
             cartasPago.show(datosPago, m == MedioPago.EFECTIVO ? "EFECTIVO" : "ELECTRONICO");
+            etiquetaOperacion.setText(m == MedioPago.TARJETA ? "Número de tarjeta" : "Número de operación");
             operacion.setText("");
             operacion.setError(false);
             recibido.setError(false);
@@ -586,6 +593,26 @@ class PanelVenta extends PanelBase {
             aviso.mostrar(Aviso.Tipo.ERROR, ValidacionesPago.errorOperacion(operacion.getText()));
             operacion.requestFocusInWindow();
             return;
+        }
+                if (t == TipoComprobante.BOLETA) {
+            String errorDni = Validaciones.errorDni(dni.getText());
+            String errorNombre = Validaciones.errorNombre("nombre del cliente", nombre.getText(), Validaciones.MAX_NOMBRE_CLIENTE);
+            if (errorDni != null || errorNombre != null) {
+                dni.setError(errorDni != null);
+                nombre.setError(errorDni == null);
+                aviso.mostrar(Aviso.Tipo.ERROR, errorDni != null ? errorDni : errorNombre);
+                (errorDni != null ? dni : nombre).requestFocusInWindow();
+                return;
+            }
+        }
+                if (t == TipoComprobante.FACTURA) {
+            String errorRuc = Validaciones.errorRuc(ruc.getText());
+            if (errorRuc != null) {
+                ruc.setError(true);
+                aviso.mostrar(Aviso.Tipo.ERROR, errorRuc);
+                ruc.requestFocusInWindow();
+                return;
+            }
         }
         Comprobante[] comp = new Comprobante[1];
         boolean ok = ejecutar(() -> {
