@@ -103,7 +103,8 @@ public class ControladorVenta {
     }
 
     public Cliente obtenerCliente(TipoDocumento tipo, String numero, String nombreRazonSocial, String direccion) {
-               String doc = numero == null ? "" : (tipo == TipoDocumento.DNI ? numero : numero.trim());
+            String doc = numero == null ? "" : (tipo == TipoDocumento.DNI ? numero : numero.trim());
+            validarDocumentoCliente(tipo, doc);
         if (tipo == TipoDocumento.DNI) {
             String errorNombre = Validaciones.errorNombre("nombre del cliente", nombreRazonSocial, Validaciones.MAX_NOMBRE_CLIENTE);
             if (errorNombre != null) {
